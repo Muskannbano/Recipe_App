@@ -2,11 +2,12 @@ const searchBox = document.querySelector('.searchBox')
 const searchBtn = document.querySelector('.searchBtn')
 const recipe_container = document.querySelector('.recipe-container')
 const recipeDetailsContent = document.querySelector('.recipe-details-content')
-const closeBtn = document.querySelector('.recipe-close- btn')
+const closeBtn = document.querySelector('.recipe-close-btn')
 
 const fetchRecipes =  async (query) => {
      recipe_container.innerHTML="<h2>Fetching Recipes...</h2>"
-    const data = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${query}`)
+     try {
+            const data = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${query}`)
     const response = await data.json()
     recipe_container.innerHTML=""
     response.meals.forEach(meal => {
@@ -29,6 +30,10 @@ const fetchRecipes =  async (query) => {
         })
          recipe_container.appendChild(recipeDiv)
     })
+     } catch (error) {
+           recipe_container.innerHTML="<h2>Error in Fetching Recipes...</h2>"
+     }
+
     // console.log(response)
 }
 //Function to fetch ingredients
@@ -48,17 +53,28 @@ const fetchIngredients = (meal) => {
 }
 const openRecipePopup = (meal) => {
     recipeDetailsContent.innerHTML = `
-    <h2>${meal.strMeal}</h2>
+    <h2 class="recipeName">${meal.strMeal}</h2>
     <h3>Ingredients</h3>
-    <ul>${fetchIngredients(meal)}</ul>
+    <ul class="ingredientList">${fetchIngredients(meal)}</ul>
+     <div class="recipeInstructions">
+     <h3>Instructions:</h3>
+     <p >${meal.strInstructions}</p>
+     </div>
     `
+   
     recipeDetailsContent.parentElement.style.display = "block"
 }
-
+closeBtn.addEventListener('click',()=>{
+  recipeDetailsContent.parentElement.style.display="none"  
+})
 searchBtn.addEventListener('click',(e)=>{
     e.preventDefault()
     // console.log("ButtonClicked!!");
     const searchInput = searchBox.value.trim()
+    if(!searchInput){
+        recipe_container.innerHTML=`<h2>Type the meal in the search box.</h2>`
+        return
+    }
     fetchRecipes(searchInput)
     
 })
